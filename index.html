@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f1eff6">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#11131f">
+<meta name="description" content="Случайные завязки для фэнтези-историй">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Кузница сюжетов">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>Кузница сюжетов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=Alegreya:ital,wght@0,400;0,500;1,400&family=Philosopher:wght@700&display=swap">
+<style>
+/* Layout: одна колонка для телефона. Сверху готовый сюжет, под ним составляющие с замками, снизу закреплённая кнопка. */
+:root {
+  --bg: #f1eff6;
+  --surface: #fbfaff;
+  --surface2: #e8e4f1;
+  --fg: #1c1a2b;
+  --muted: #5b5873;
+  --line: #d5d0e3;
+  --accent: #8c5c0e;
+  --on-accent: #fffaf0;
+  --tint: rgba(140, 92, 14, 0.17);
+  --font-display: 'Philosopher', Georgia, serif;
+  --font-text: 'Alegreya', Georgia, serif;
+  --font-ui: 'Alegreya Sans', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11131f;
+    --surface: #1a1d2e;
+    --surface2: #232740;
+    --fg: #ebe8f4;
+    --muted: #a09db8;
+    --line: #2f3352;
+    --accent: #d9b25f;
+    --on-accent: #1a1405;
+    --tint: rgba(217, 178, 95, 0.22);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11131f;
+  --surface: #1a1d2e;
+  --surface2: #232740;
+  --fg: #ebe8f4;
+  --muted: #a09db8;
+  --line: #2f3352;
+  --accent: #d9b25f;
+  --on-accent: #1a1405;
+  --tint: rgba(217, 178, 95, 0.22);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 17px;
+  line-height: 1.4;
+}
+.app {
+  max-width: 640px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-block: 20px 130px;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+header svg { flex: none; color: var(--accent); }
+h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+}
+.tagline { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; }
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface2);
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+.tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  min-height: 44px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.tab[aria-selected="true"] {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--fg);
+}
+.count {
+  display: inline-block;
+  min-width: 1.4em;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+}
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.story {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: 1.28rem;
+  line-height: 1.55;
+  max-width: 65ch;
+}
+.k {
+  background: linear-gradient(transparent 62%, var(--tint) 62%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.story-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-weight: 500;
+}
+.btn svg { fill: none; stroke: currentColor; }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.btn[aria-pressed="true"] svg { fill: currentColor; }
+.btn.danger { color: var(--muted); }
+
+.sub {
+  margin: 28px 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+.hint { margin: 0 0 14px; color: var(--muted); font-size: 0.95rem; }
+
+.slots { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.slot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 12px 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.slot.locked { background: var(--surface2); }
+.slot-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.slot-value { font-family: var(--font-text); font-size: 1.08rem; line-height: 1.35; overflow-wrap: anywhere; }
+.slot-value.roll { animation: roll 0.28s ease-out; }
+@keyframes roll { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.slot-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+}
+.icon-btn[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.icon-btn .i-closed, .icon-btn[aria-pressed="true"] .i-open { display: none; }
+.icon-btn[aria-pressed="true"] .i-closed { display: block; }
+.icon-btn:disabled { opacity: 0.4; cursor: default; }
+
+.fav-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.fav-text { margin: 0 0 6px; font-family: var(--font-text); font-size: 1.08rem; line-height: 1.5; }
+.fav-date { margin: 0 0 14px; font-size: 0.85rem; color: var(--muted); }
+.fav-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.empty { color: var(--muted); }
+.empty p { margin: 0 0 8px; }
+
+.bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 18px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, var(--bg) 72%, transparent);
+  display: flex;
+  justify-content: center;
+}
+.forge {
+  width: 100%;
+  max-width: 608px;
+  min-height: 56px;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: 0;
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+.forge:active { transform: translateY(1px); }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  background: var(--fg);
+  color: var(--bg);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.toast.show { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slot-value.roll { animation: none; }
+  .toast { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M26 6a14 14 0 1 0 8 22 11 11 0 0 1-8-22z"/>
+      <path d="M31 8v5M28.5 10.5h5" />
+    </svg>
+    <div>
+      <h1>Кузница сюжетов</h1>
+      <p class="tagline" id="tagline"></p>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-gen" aria-selected="true" aria-controls="view-gen">Генератор</button>
+    <button class="tab" role="tab" id="tab-fav" aria-selected="false" aria-controls="view-fav">Избранное<span class="count" id="favCount">0</span></button>
+  </div>
+
+  <main id="view-gen" role="tabpanel" aria-labelledby="tab-gen">
+    <section class="card" aria-live="polite">
+      <p class="eyebrow">Завязка</p>
+      <p class="story" id="story"></p>
+      <div class="story-actions">
+        <button class="btn" id="copyBtn" type="button">Копировать</button>
+        <button class="btn" id="favBtn" type="button" aria-pressed="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+          <span id="favLabel">В избранное</span>
+        </button>
+      </div>
+    </section>
+
+    <h2 class="sub">Составляющие</h2>
+    <p class="hint">Закрепи замком то, что нравится, и нажми «Выковать» ещё раз. Остальное заменится.</p>
+    <ul class="slots" id="slots"></ul>
+  </main>
+
+  <main id="view-fav" role="tabpanel" aria-labelledby="tab-fav" hidden>
+    <div id="favRoot"></div>
+  </main>
+</div>
+
+<div class="bar" id="bar">
+  <button class="forge" id="forge" type="button">Выковать новый сюжет</button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var SLOTS = [
+    { label: 'Герой', opts: [
+      'Бывшая воровка гильдии теней',
+      'Хромой картограф, ни разу не покидавший город',
+      'Дочь кузнеца, чей молот помнит имена',
+      'Жрец, потерявший веру, но не дар',
+      'Юная смотрительница маяка на краю мира',
+      'Наёмник, которому нельзя умереть до весны',
+      'Последний переписчик запрещённых легенд',
+      'Принцесса, объявленная мёртвой на собственных похоронах',
+      'Подмастерье с чужой тенью',
+      'Старая сказительница, забывающая конец каждой истории',
+      'Лекарь, лечащий только врагов',
+      'Охотник, за которым идёт его собственная добыча'
+    ]},
+    { label: 'Мир', opts: [
+      'город, растущий на спине спящего великана',
+      'архипелаг парящих островов, связанных мостами из паутины',
+      'лес, где деревья записывают всё, что слышат',
+      'пустыня, под песком которой лежит затонувшее небо',
+      'монастырь у подножия вечно падающего водопада',
+      'столица, где закат длится целый год',
+      'библиотека-лабиринт, перестраивающаяся по ночам',
+      'долина богов-призраков, забытых людьми',
+      'ледяной порт, откуда корабли уходят в прошлое',
+      'ярмарочный город, переезжающий каждую ночь',
+      'подземное царство лунных садов',
+      'граница, которую каждое утро проводят заново'
+    ]},
+    { label: 'Магия', opts: [
+      'долг, который берут у будущего',
+      'власть имени над тем, что названо',
+      'топливо из воспоминаний',
+      'музыка, которую слышат лишь немногие',
+      'сила рек, пересыхающая вместе с ними',
+      'болезнь, передающаяся по наследству и по прикосновению',
+      'честный обмен, за которым следит сам мир',
+      'голоса мёртвых, одолженные живым',
+      'узоры на ткани, коже и картах',
+      'звёздный свет, слабеющий в безлунные ночи',
+      'слово, сказанное в нужный час',
+      'запретное ремесло, которому учатся тайно'
+    ]},
+    { label: 'Задача', opts: [
+      'вернуть украденное солнце в храм',
+      'доставить письмо, которое нельзя открывать, на другой край света',
+      'найти забытого бога и уговорить его проснуться',
+      'пересечь Сонное море, не заснув ни разу',
+      'разбудить спящего короля, не развязав войну',
+      'сжечь карту, по которой живёт целый народ',
+      'вынести из мёртвого города его последнюю песню',
+      'собрать семь осколков разбитой луны',
+      'помирить два враждующих времени года',
+      'отыскать того, кто придумал этот мир',
+      'спасти заклятого врага, от которого зависит всё',
+      'похоронить меч, не желающий покоя'
+    ]},
+    { label: 'Срок', opts: [
+      'прежде чем взойдёт вторая луна',
+      'прежде чем перевал занесёт снегом навсегда',
+      'прежде чем догорит последняя из семи свечей',
+      'прежде чем река повернёт вспять',
+      'прежде чем город проснётся',
+      'прежде чем отзвучит последний удар великого колокола',
+      'прежде чем кончится затмение, длящееся три дня',
+      'прежде чем созреет плод на проклятом дереве',
+      'прежде чем врага коронуют',
+      'прежде чем весна сотрёт все следы'
+    ]},
+    { label: 'Поворот', opts: [
+      'самый верный союзник давно служит врагу',
+      'враг оказывается давно потерянным родным человеком',
+      'цель пути — не вещь, а человек',
+      'карта лжёт, и каждый, кто ей верит, меняется',
+      'всё происходящее — чья-то записанная история, и автор недоволен концовкой',
+      'победа сделает мир только хуже',
+      'магия, помогавшая в пути, начинает требовать плату',
+      'проводник знает дорогу, потому что однажды уже погиб на ней',
+      'боги давно мертвы, а их голоса — чья-то ловкая игра',
+      'цель достигнута слишком легко, и это ловушка',
+      'тот, кто послал в путь, сам боится успеха',
+      'древнее пророчество оказывается плохим переводом'
+    ]},
+    { label: 'Цена', opts: [
+      'память о самом дорогом человеке',
+      'родное имя',
+      'право вернуться домой',
+      'голос',
+      'тень, которая уйдёт к врагу',
+      'десять лет жизни, отданные незнакомцу',
+      'вера в то, ради чего всё начиналось',
+      'единственная дружба, которую уже не вернуть',
+      'возможность быть прощённым',
+      'право рассказать эту историю по-своему'
+    ]}
+  ];
+
+  var LOCK_SVG = '<svg class="i-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>' +
+    '<svg class="i-closed" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  var ROLL_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.5L20 16"/><path d="M20 20v-4h-4"/></svg>';
+
+  var KEY = 'kuznitsa-syuzhetov-favs-v1';
+  var state = { idx: [], locked: SLOTS.map(function () { return false; }) };
+  var favs = [];
+
+  function $(s) { return document.querySelector(s); }
+  function rnd(n) { return Math.floor(Math.random() * n); }
+
+  function pickNew(i) {
+    var n = SLOTS[i].opts.length, cur = state.idx[i], v;
+    if (cur === undefined) return rnd(n);
+    do { v = rnd(n); } while (v === cur);
+    return v;
+  }
+
+  function compose(idx, html) {
+    var v = SLOTS.map(function (s, i) {
+      var t = s.opts[idx[i]];
+      return html ? '<span class="k">' + t + '</span>' : t;
+    });
+    return v[0] + '. Место действия — ' + v[1] + '. Магия здесь — ' + v[2] +
+      '. Нужно ' + v[3] + ', ' + v[4] + '. Но ' + v[5] + '. Цена — ' + v[6] + '.';
+  }
+
+  function keyOf(idx) { return idx.join(','); }
+
+  /* ---------- toast ---------- */
+  var toastTimer;
+  function toast(msg) {
+    var el = $('#toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2400);
+  }
+
+  /* ---------- copy ---------- */
+  function copyText(t) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = t;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      toast(ok ? 'Скопировано' : 'Не удалось скопировать. Выдели текст и скопируй вручную.');
+    }
+    try {
+      navigator.clipboard.writeText(t).then(function () { toast('Скопировано'); }, fallback);
+    } catch (e) { fallback(); }
+  }
+
+  /* ---------- slots ---------- */
+  function buildRows() {
+    var ul = $('#slots');
+    SLOTS.forEach(function (s, i) {
+      var li = document.createElement('li');
+      li.className = 'slot';
+      li.dataset.i = i;
+      li.innerHTML =
+        '<div class="slot-main"><div class="slot-label">' + s.label + '</div><div class="slot-value" id="sv' + i + '"></div></div>' +
+        '<div class="slot-actions">' +
+        '<button class="icon-btn" type="button" data-act="lock" aria-pressed="false" aria-label="Закрепить: ' + s.label + '">' + LOCK_SVG + '</button>' +
+        '<button class="icon-btn" type="button" data-act="roll" aria-label="Заменить: ' + s.label + '">' + ROLL_SVG + '</button>' +
+        '</div>';
+      ul.appendChild(li);
+    });
+  }
+
+  function render(changed) {
+    $('#story').innerHTML = compose(state.idx, true);
+    SLOTS.forEach(function (s, i) {
+      var el = $('#sv' + i);
+      el.textContent = s.opts[state.idx[i]];
+      if (changed && changed.indexOf(i) !== -1) {
+        el.classList.remove('roll');
+        void el.offsetWidth;
+        el.classList.add('roll');
+      }
+      var li = el.closest('.slot');
+      li.classList.toggle('locked', state.locked[i]);
+      var lock = li.querySelector('[data-act="lock"]');
+      lock.setAttribute('aria-pressed', state.locked[i] ? 'true' : 'false');
+      lock.setAttribute('aria-label', (state.locked[i] ? 'Снять замок: ' : 'Закрепить: ') + s.label);
+      li.querySelector('[data-act="roll"]').disabled = state.locked[i];
+    });
+    updateFavBtn();
+  }
+
+  function forge() {
+    var free = [];
+    SLOTS.forEach(function (_, i) { if (!state.locked[i]) free.push(i); });
+    if (!free.length) {
+      toast('Всё закреплено. Сними замок, чтобы получить новый сюжет.');
+      return;
+    }
+    free.forEach(function (i) { state.idx[i] = pickNew(i); });
+    render(free);
+  }
+
+  $('#slots').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]');
+    if (!b || b.disabled) return;
+    var i = Number(b.closest('.slot').dataset.i);
+    if (b.dataset.act === 'lock') {
+      state.locked[i] = !state.locked[i];
+      render();
+    } else {
+      state.idx[i] = pickNew(i);
+      render([i]);
+    }
+  });
+
+  /* ---------- favourites ---------- */
+  function loadFavs() {
+    try {
+      var r = localStorage.getItem(KEY);
+      favs = r ? JSON.parse(r) : [];
+      if (!Array.isArray(favs)) favs = [];
+    } catch (e) { favs = []; }
+  }
+  function saveFavs() {
+    try { localStorage.setItem(KEY, JSON.stringify(favs)); } catch (e) { /* хранилище недоступно */ }
+  }
+  function isFav(idx) {
+    var k = keyOf(idx);
+    return favs.some(function (f) { return keyOf(f.idx) === k; });
+  }
+  function updateFavBtn() {
+    var on = isFav(state.idx);
+    var b = $('#favBtn');
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('#favLabel').textContent = on ? 'В избранном' : 'В избранное';
+    $('#favCount').textContent = favs.length;
+  }
+  function toggleFav() {
+    var k = keyOf(state.idx);
+    if (isFav(state.idx)) {
+      favs = favs.filter(function (f) { return keyOf(f.idx) !== k; });
+      toast('Убрано из избранного');
+    } else {
+      favs.unshift({ id: Date.now(), idx: state.idx.slice(), text: compose(state.idx, false), ts: Date.now() });
+      toast('Сохранено в избранное');
+    }
+    saveFavs();
+    updateFavBtn();
+  }
+
+  function validIdx(idx) {
+    return Array.isArray(idx) && idx.length === SLOTS.length && idx.every(function (v, i) {
+      return Number.isInteger(v) && v >= 0 && v < SLOTS[i].opts.length;
+    });
+  }
+
+  function renderFavs() {
+    var root = $('#favRoot');
+    root.textContent = '';
+    if (!favs.length) {
+      var box = document.createElement('div');
+      box.className = 'card empty';
+      box.innerHTML = '<p><strong>Пока пусто.</strong></p><p>Нажми «В избранное» под сюжетом, и он появится здесь.</p>';
+      root.appendChild(box);
+      return;
+    }
+    var ul = document.createElement('ul');
+    ul.className = 'fav-list';
+    favs.forEach(function (f) {
+      var li = document.createElement('li');
+      li.className = 'card';
+      var p = document.createElement('p');
+      p.className = 'fav-text';
+      p.textContent = f.text;
+      var d = document.createElement('p');
+      d.className = 'fav-date';
+      d.textContent = 'Сохранено ' + new Date(f.ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+      var row = document.createElement('div');
+      row.className = 'fav-actions';
+      [['open', 'В генератор'], ['copy', 'Копировать'], ['del', 'Удалить']].forEach(function (a) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn' + (a[0] === 'del' ? ' danger' : '');
+        b.dataset.act = a[0];
+        b.dataset.id = f.id;
+        b.textContent = a[1];
+        row.appendChild(b);
+      });
+      li.appendChild(p); li.appendChild(d); li.appendChild(row);
+      ul.appendChild(li);
+    });
+    root.appendChild(ul);
+  }
+
+  $('#favRoot').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]');
+    if (!b) return;
+    var id = Number(b.dataset.id);
+    var f = favs.filter(function (x) { return x.id === id; })[0];
+    if (!f) return;
+    if (b.dataset.act === 'copy') {
+      copyText(f.text);
+    } else if (b.dataset.act === 'del') {
+      favs = favs.filter(function (x) { return x.id !== id; });
+      saveFavs(); renderFavs(); updateFavBtn();
+      toast('Удалено');
+    } else if (validIdx(f.idx)) {
+      state.idx = f.idx.slice();
+      state.locked = SLOTS.map(function () { return false; });
+      showView('gen');
+      render(SLOTS.map(function (_, i) { return i; }));
+      window.scrollTo(0, 0);
+    }
+  });
+
+  /* ---------- tabs ---------- */
+  function showView(v) {
+    var gen = v === 'gen';
+    $('#view-gen').hidden = !gen;
+    $('#view-fav').hidden = gen;
+    $('#bar').hidden = !gen;
+    $('#tab-gen').setAttribute('aria-selected', gen ? 'true' : 'false');
+    $('#tab-fav').setAttribute('aria-selected', gen ? 'false' : 'true');
+    if (!gen) renderFavs();
+  }
+  $('#tab-gen').addEventListener('click', function () { showView('gen'); });
+  $('#tab-fav').addEventListener('click', function () { showView('fav'); });
+
+  $('#forge').addEventListener('click', forge);
+  $('#copyBtn').addEventListener('click', function () { copyText(compose(state.idx, false)); });
+  $('#favBtn').addEventListener('click', toggleFav);
+
+  /* ---------- start ---------- */
+  var total = SLOTS.reduce(function (a, s) { return a * s.opts.length; }, 1);
+  $('#tagline').textContent = total.toLocaleString('ru-RU') + ' сочетаний для завязки';
+  loadFavs();
+  buildRows();
+  state.idx = SLOTS.map(function (s) { return rnd(s.opts.length); });
+  render();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
